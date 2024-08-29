@@ -45,7 +45,7 @@ const baseConfig = {
   host: process.env.DB_HOST,
   dialect: 'mysql', // Explicitly specify the dialect
   dialectOptions: {
-    // Adjust these options based on your MySQL configuration
+    // Adjust these options based on MySQL configuration
     // Example:
     // ssl: {
     //   require: true, // Enable SSL if required
