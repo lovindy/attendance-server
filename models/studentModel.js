@@ -1,11 +1,32 @@
+const { Model } = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
-  const Student = sequelize.define(
-    'Student',
+  class Student extends Model {
+    // instance or class methods here if needed
+  }
+
+  Student.init(
     {
       student_id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true,
+      },
+      guardian_name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      guardian_email: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      guardian_relationship: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      guardian_contact: {
+        type: DataTypes.STRING,
+        allowNull: false,
       },
       active: {
         type: DataTypes.BOOLEAN,
@@ -14,6 +35,7 @@ module.exports = (sequelize, DataTypes) => {
       },
     },
     {
+      sequelize,
       tableName: 'students',
       timestamps: true,
       underscored: true,
@@ -21,17 +43,19 @@ module.exports = (sequelize, DataTypes) => {
   );
 
   Student.associate = (models) => {
-    Student.belongsTo(models.User, {
-      foreignKey: 'user_id',
-      as: 'User',
+    Student.belongsTo(models.SchoolAdmin, {
+      foreignKey: 'school_admin_id',
+      as: 'SchoolAdmin',
     });
+
     Student.belongsTo(models.Class, {
       foreignKey: 'class_id',
       as: 'Class',
     });
-    Student.belongsTo(models.SchoolAdmin, {
-      foreignKey: 'school_admin_id',
-      as: 'SchoolAdmin',
+
+    Student.belongsTo(models.Info, {
+      foreignKey: 'info_id',
+      as: 'Info',
     });
   };
 

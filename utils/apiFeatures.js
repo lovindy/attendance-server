@@ -1,5 +1,7 @@
+// Import Sequelize Module
 const { Sequelize } = require('sequelize');
 
+// Create a new instance of Sequelize
 class APIFeatures {
   constructor(query, queryString) {
     this.query = query;
@@ -7,6 +9,7 @@ class APIFeatures {
     this.options = {}; // Collect options for findAll here
   }
 
+  // Filter Object Function
   filter() {
     const queryObj = { ...this.queryString };
     const excludedFields = ['page', 'sort', 'limit', 'fields'];
@@ -28,6 +31,7 @@ class APIFeatures {
     return this;
   }
 
+  // Sort Object Function
   sort() {
     if (this.queryString.sort) {
       const sortBy = this.queryString.sort
@@ -42,6 +46,7 @@ class APIFeatures {
     return this;
   }
 
+  // Limit Fields Function
   limitFields() {
     if (this.queryString.fields) {
       const fields = this.queryString.fields.split(',');
@@ -54,6 +59,7 @@ class APIFeatures {
     return this;
   }
 
+  // Pagination Function
   paginate() {
     const page = this.queryString.page * 1 || 1;
     const limit = this.queryString.limit * 1 || 100;
@@ -66,6 +72,7 @@ class APIFeatures {
     return this;
   }
 
+  // Execute the query
   async exec() {
     try {
       const result = await this.query.findAll(this.options);

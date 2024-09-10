@@ -1,23 +1,20 @@
+const { Model } = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
-  const Teacher = sequelize.define(
-    'Teacher',
+  class Teacher extends Model {
+    // instance or class methods here if needed
+  }
+
+  Teacher.init(
     {
       teacher_id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true,
       },
-      subject: {
-        type: DataTypes.STRING,
-        defaultValue: null,
-      },
-      active: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: true,
-        allowNull: false,
-      },
     },
     {
+      sequelize,
       tableName: 'teachers',
       timestamps: true,
       underscored: true,
@@ -35,11 +32,15 @@ module.exports = (sequelize, DataTypes) => {
       as: 'SchoolAdmin',
     });
 
-    Teacher.belongsToMany(models.Schedule, {
-      through: 'teacher_schedules',
+    Teacher.belongsTo(models.Info, {
+      foreignKey: 'info_id',
+      as: 'Info',
+    });
+
+    Teacher.hasMany(models.Session, {
       foreignKey: 'teacher_id',
-      otherKey: 'schedule_id',
-      as: 'Schedules',
+      as: 'Sessions',
+      onDelete: 'CASCADE',
     });
   };
 

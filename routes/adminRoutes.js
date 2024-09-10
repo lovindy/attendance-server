@@ -1,12 +1,27 @@
+// Express library
 const express = require('express');
-const adminController = require('../controllers/adminController');
 
+// Controllers
+const adminController = require('../controllers/adminController');
+const authController = require('../controllers/authController');
+
+// Define Express Router
 const router = express.Router();
 
-router.get('/', adminController.getAllAdmins);
-router.post('/', adminController.addAdmin);
-router.get('/:id', adminController.getAdmin);
-router.put('/:id', adminController.updateAdmin);
-router.delete('/:id', adminController.deleteAdmin);
+// Protect all routes after this middleware
+router.use(authController.protect);
+
+// Restrict all routes to admin only
+router.use(authController.restrictTo('admin'));
+
+// Admin routes
+router
+  .get('/', adminController.getAllAdmins)
+  .post('/', adminController.addAdmin);
+
+router
+  .get('/:id', adminController.getAdmin)
+  .put('/:id', adminController.updateAdmin)
+  .delete('/:id', adminController.deleteAdmin);
 
 module.exports = router;

@@ -1,15 +1,29 @@
+const { Model } = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
-  const School = sequelize.define(
-    'School',
+  class School extends Model {
+    // instance or class methods here if needed
+  }
+
+  School.init(
     {
       school_id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true,
       },
-      name: DataTypes.STRING,
-      address: DataTypes.STRING,
-      logo_url: DataTypes.STRING,
+      school_name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      school_phone_number: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      school_address: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
       active: {
         type: DataTypes.BOOLEAN,
         defaultValue: true,
@@ -17,6 +31,7 @@ module.exports = (sequelize, DataTypes) => {
       },
     },
     {
+      sequelize,
       tableName: 'schools',
       timestamps: true,
       underscored: true,

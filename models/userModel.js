@@ -4,21 +4,18 @@ const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
-    /**
-     * Check if entered password is correct
-     * @param {string} candidatePassword - Entered password
-     * @param {string} userPassword - Hashed password from DB
-     * @returns {boolean} - True if passwords match
-     */
-    async correctPassword(candidatePassword, userPassword) {
-      return await bcrypt.compare(candidatePassword, userPassword);
+    // Method to check if a provided password matches the stored hashed password
+    async correctPassword(candidatePassword) {
+      if (!candidatePassword) {
+        return false;
+      }
+      if (!this.password) {
+        return false;
+      }
+      return await bcrypt.compare(candidatePassword, this.password);
     }
 
-    /**
-     * Check if password was changed after JWT was issued
-     * @param {number} JWTTimestamp - JWT issuance timestamp
-     * @returns {boolean} - True if password was changed after JWT issuance
-     */
+    // Method to check if the password was changed after a certain timestamp
     changedPasswordAfter(JWTTimestamp) {
       if (this.passwordChangedAt) {
         const changedTimestamp = parseInt(
@@ -27,13 +24,10 @@ module.exports = (sequelize, DataTypes) => {
         );
         return JWTTimestamp < changedTimestamp;
       }
-      return false; // False means NOT changed
+      return false;
     }
 
-    /**
-     * Create password reset token
-     * @returns {string} - Reset token to be sent to user
-     */
+    // Method to create a password reset token
     createPasswordResetToken() {
       const resetToken = crypto.randomBytes(32).toString('hex');
 
@@ -46,23 +40,28 @@ module.exports = (sequelize, DataTypes) => {
 
       return resetToken;
     }
+
+    // Method to create an email verification token
+    createEmailVerificationToken() {
+      const verificationToken = crypto.randomBytes(32).toString('hex');
+
+      this.emailVerificationToken = crypto
+        .createHash('sha256')
+        .update(verificationToken)
+        .digest('hex');
+
+      this.emailVerificationExpires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours from now
+
+      return verificationToken;
+    }
   }
 
-  // Define user model
   User.init(
     {
       user_id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true,
-      },
-      name: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-          notNull: { msg: 'A name is required' },
-          notEmpty: { msg: 'Name cannot be empty' },
-        },
       },
       email: {
         type: DataTypes.STRING,
@@ -102,12 +101,12 @@ module.exports = (sequelize, DataTypes) => {
         },
       },
       role: {
-        type: DataTypes.ENUM('admin', 'teacher', 'student'),
+        type: DataTypes.ENUM('admin', 'teacher'),
         allowNull: false,
-        defaultValue: 'student',
+        defaultValue: 'admin',
         validate: {
           isIn: {
-            args: [['admin', 'teacher', 'student']],
+            args: [['admin', 'teacher']],
             msg: 'Invalid role',
           },
         },
@@ -121,6 +120,16 @@ module.exports = (sequelize, DataTypes) => {
       passwordResetExpires: {
         type: DataTypes.DATE,
       },
+      emailVerificationToken: {
+        type: DataTypes.STRING,
+      },
+      emailVerificationExpires: {
+        type: DataTypes.DATE,
+      },
+      emailVerified: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+      },
       active: {
         type: DataTypes.BOOLEAN,
         defaultValue: true,
@@ -132,14 +141,21 @@ module.exports = (sequelize, DataTypes) => {
       tableName: 'users',
       timestamps: true,
       underscored: true,
+      indexes: [
+        {
+          unique: true,
+          fields: ['email'],
+        },
+      ],
       defaultScope: {
-        // Exclude password and inactive users by default
         attributes: {
           exclude: [
             'password',
             'passwordConfirm',
             'passwordResetToken',
             'passwordResetExpires',
+            'emailVerificationToken',
+            'emailVerificationExpires',
           ],
         },
         where: {
@@ -147,7 +163,6 @@ module.exports = (sequelize, DataTypes) => {
         },
       },
       scopes: {
-        // Include password for authentication purposes
         withPassword: {
           attributes: {},
         },
@@ -155,40 +170,30 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
 
-  /**
-   * HASH PASSWORD BEFORE SAVING
-   */
+  // Hook to hash the password before saving a user
   User.addHook('beforeSave', async (user) => {
     if (user.changed('password')) {
       user.password = await bcrypt.hash(user.password, 12);
       user.passwordConfirm = undefined;
       if (!user.isNewRecord) {
-        user.passwordChangedAt = new Date(Date.now() - 1000); // Subtract 1s to account for token issuance delay
+        user.passwordChangedAt = new Date(Date.now() - 1000);
       }
     }
   });
 
-  /**
-   * ASSOCIATE MODELS
-   */
+  // Define associations
   User.associate = (models) => {
-    User.hasOne(models.Student, {
-      foreignKey: 'user_id',
-      as: 'StudentProfile',
-      onDelete: 'CASCADE',
-    });
-    User.hasOne(models.Teacher, {
-      foreignKey: 'user_id',
-      as: 'TeacherProfile',
-      onDelete: 'CASCADE',
-    });
     User.hasOne(models.Admin, {
       foreignKey: 'user_id',
       as: 'AdminProfile',
       onDelete: 'CASCADE',
     });
 
-    // This association ensures that a user can have one profile (admin, teacher, or student) based on the role.
+    User.hasOne(models.Teacher, {
+      foreignKey: 'user_id',
+      as: 'TeacherProfile',
+      onDelete: 'CASCADE',
+    });
   };
 
   return User;

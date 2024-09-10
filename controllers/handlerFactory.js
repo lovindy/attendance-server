@@ -6,7 +6,7 @@ const APIFeatures = require('../utils/apiFeatures');
 // Create One
 exports.createOne = (Model, popOptions = []) =>
   catchAsync(async (req, res, next) => {
-    const doc = await Model.create(req.body, { include: popOptions }); // Include associations
+    const doc = await Model.create(req.body, { include: popOptions });
 
     res.status(201).json({
       status: 'success',
@@ -32,9 +32,7 @@ exports.getOne = (Model, idField, popOptions = []) =>
 
     res.status(200).json({
       status: 'success',
-      data: {
-        data: doc,
-      },
+      data: doc,
     });
   });
 
@@ -67,6 +65,7 @@ exports.getAll = (Model, additionalFilter = {}, popOptions = []) =>
     });
   });
 
+// Update One
 exports.updateOne = (Model, idField) =>
   catchAsync(async (req, res, next) => {
     try {
@@ -97,6 +96,7 @@ exports.updateOne = (Model, idField) =>
     }
   });
 
+// Delete One
 exports.deleteOne = (Model, idField) =>
   catchAsync(async (req, res, next) => {
     console.log(
@@ -109,6 +109,23 @@ exports.deleteOne = (Model, idField) =>
     if (!doc) {
       console.error(`No document found with ${idField}: ${req.params.id}`); // Log if no record is found
       return next(new AppError(`No document found with that ${idField}`, 404));
+    }
+
+    res.status(204).json({
+      status: 'success',
+      data: null,
+    });
+  });
+
+// Delete All
+exports.deleteAll = (Model) =>
+  catchAsync(async (req, res, next) => {
+    console.log('Deleting all records'); // Log the correct model name
+    const doc = await Model.destroy({ where: {} });
+
+    if (!doc) {
+      console.error('No documents found'); // Log if no records are found
+      return next(new AppError('No documents found', 404));
     }
 
     res.status(204).json({

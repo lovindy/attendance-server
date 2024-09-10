@@ -1,6 +1,11 @@
+const { Model } = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
-  const DayOfWeek = sequelize.define(
-    'DayOfWeek',
+  class DayOfWeek extends Model {
+    // instance or class methods here if needed
+  }
+
+  DayOfWeek.init(
     {
       day_id: {
         type: DataTypes.INTEGER,
@@ -26,6 +31,7 @@ module.exports = (sequelize, DataTypes) => {
       },
     },
     {
+      sequelize,
       tableName: 'days',
       timestamps: true,
       underscored: true,
@@ -33,9 +39,9 @@ module.exports = (sequelize, DataTypes) => {
   );
 
   DayOfWeek.associate = (models) => {
-    DayOfWeek.hasMany(models.Schedule, {
+    DayOfWeek.hasMany(models.Session, {
       foreignKey: 'day_id',
-      as: 'Schedules',
+      as: 'Sessions',
       onDelete: 'CASCADE',
     });
   };

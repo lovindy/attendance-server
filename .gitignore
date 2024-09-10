@@ -7,8 +7,17 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules/*
-.env
+client/node_modules
+server/node_modules
+
+# Ignore all .env files
+*.env
+
+# Ignore specific .env files in the server folder
+.env.test
+.env.production
+.env.development
+
 dist
 dist-ssr
 *.local

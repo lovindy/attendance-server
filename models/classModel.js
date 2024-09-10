@@ -1,13 +1,18 @@
+const { Model } = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
-  const Class = sequelize.define(
-    'Class',
+  class Class extends Model {
+    // instance or class methods here if needed
+  }
+
+  Class.init(
     {
       class_id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true,
       },
-      name: {
+      class_name: {
         type: DataTypes.STRING,
         allowNull: false,
       },
@@ -22,6 +27,7 @@ module.exports = (sequelize, DataTypes) => {
       },
     },
     {
+      sequelize,
       tableName: 'classes',
       timestamps: true,
       underscored: true,
@@ -29,11 +35,6 @@ module.exports = (sequelize, DataTypes) => {
   );
 
   Class.associate = (models) => {
-    Class.belongsTo(models.Teacher, {
-      foreignKey: 'teacher_id',
-      as: 'Teacher',
-    });
-
     Class.belongsTo(models.SchoolAdmin, {
       foreignKey: 'school_admin_id',
       as: 'SchoolAdmin',
@@ -42,19 +43,13 @@ module.exports = (sequelize, DataTypes) => {
     Class.hasMany(models.Student, {
       foreignKey: 'class_id',
       as: 'Students',
-    });
-
-    Class.hasMany(models.Schedule, {
-      foreignKey: 'class_id',
-      as: 'Schedules',
       onDelete: 'CASCADE',
     });
 
-    Class.belongsToMany(models.Subject, {
-      through: 'class_subjects',
+    Class.hasMany(models.Session, {
       foreignKey: 'class_id',
-      otherKey: 'subject_id',
-      as: 'Subjects',
+      as: 'Sessions',
+      onDelete: 'CASCADE',
     });
   };
 

@@ -1,6 +1,11 @@
+const { Model } = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
-  const Attendance = sequelize.define(
-    'Attendance',
+  class Attendance extends Model {
+    // instance or class methods here if needed
+  }
+
+  Attendance.init(
     {
       attendance_id: {
         type: DataTypes.INTEGER,
@@ -11,16 +16,6 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.DATEONLY,
         allowNull: false,
       },
-      status: {
-        type: DataTypes.ENUM(
-          'late',
-          'present',
-          'absent',
-          'absent_with_permission'
-        ),
-        allowNull: false,
-        defaultValue: 'absent',
-      },
       active: {
         type: DataTypes.BOOLEAN,
         defaultValue: true,
@@ -28,6 +23,7 @@ module.exports = (sequelize, DataTypes) => {
       },
     },
     {
+      sequelize,
       tableName: 'attendances',
       timestamps: true,
       underscored: true,
@@ -41,15 +37,15 @@ module.exports = (sequelize, DataTypes) => {
       onDelete: 'CASCADE',
     });
 
-    Attendance.belongsTo(models.Class, {
-      foreignKey: 'class_id',
-      as: 'Class',
+    Attendance.belongsTo(models.Session, {
+      foreignKey: 'session_id',
+      as: 'Sessions',
       onDelete: 'CASCADE',
     });
 
-    Attendance.belongsTo(models.Schedule, {
-      foreignKey: 'schedule_id',
-      as: 'Schedule',
+    Attendance.belongsTo(models.Status, {
+      foreignKey: 'status_id',
+      as: 'Status',
       onDelete: 'CASCADE',
     });
   };

@@ -1,17 +1,30 @@
+// Express library
 const express = require('express');
-const attendanceController = require('../controllers/attendanceController');
 
+// Controllers
+const attendanceController = require('../controllers/attendanceController');
+const authController = require('../controllers/authController');
+
+// Define Express Router
 const router = express.Router();
 
-// Student routes
-router.get('/', attendanceController.getStudentsWithAttendance);
-router.post('/students', attendanceController.addStudent);
-router.put('/students/:id', attendanceController.updateStudentWithAttendance);
-router.delete('/students/:id', attendanceController.deleteStudent);
+// Protect all routes after this middleware
+router.use(authController.protect);
+
+// Restrict all routes to admin only
+router.use(authController.restrictTo('admin', 'teacher'));
 
 // Attendance routes
-router.post('/', attendanceController.recordAttendance);
-router.put('/:id', attendanceController.updateAttendance);
-router.delete('/:id', attendanceController.deleteAttendance);
+router
+  .get('/', attendanceController.getStudentsWithAttendance)
+  .post('/', attendanceController.recordAttendance);
+
+// Student Attendance routes
+router.put('/students/:id', attendanceController.updateStudentWithAttendance);
+
+// Update and Delete routes
+router
+  .put('/:id', attendanceController.updateAttendance)
+  .delete('/:id', attendanceController.deleteAttendance);
 
 module.exports = router;

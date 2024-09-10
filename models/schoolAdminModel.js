@@ -1,21 +1,25 @@
+const { Model } = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
-  const SchoolAdmin = sequelize.define(
-    'SchoolAdmin',
+  class SchoolAdmin extends Model {
+    // instance or class methods here if needed
+  }
+
+  SchoolAdmin.init(
     {
       school_admin_id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true,
       },
-      role: DataTypes.STRING, // e.g., 'Principal', 'Vice Principal'
-      assigned_date: DataTypes.DATE,
-      active: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: true,
+      role: {
+        type: DataTypes.STRING,
         allowNull: false,
+        defaultValue: 'Principal',
       },
     },
     {
+      sequelize,
       tableName: 'school_admin',
       timestamps: true,
       underscored: true,
@@ -23,28 +27,30 @@ module.exports = (sequelize, DataTypes) => {
   );
 
   SchoolAdmin.associate = (models) => {
-    // Many-to-Many
     SchoolAdmin.belongsTo(models.Admin, {
       foreignKey: 'admin_id',
       as: 'Admin',
     });
 
-    // Many-to-Many
     SchoolAdmin.belongsTo(models.School, {
       foreignKey: 'school_id',
       as: 'School',
     });
 
-    // One-to-Many
     SchoolAdmin.hasMany(models.Teacher, {
       foreignKey: 'school_admin_id',
       as: 'Teachers',
     });
 
-    // One-to-Many
     SchoolAdmin.hasMany(models.Student, {
       foreignKey: 'school_admin_id',
       as: 'Students',
+    });
+
+    SchoolAdmin.hasMany(models.Session, {
+      foreignKey: 'school_admin_id',
+      as: 'Sessions',
+      onDelete: 'CASCADE',
     });
   };
 

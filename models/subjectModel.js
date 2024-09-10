@@ -1,6 +1,11 @@
+const { Model } = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
-  const Subject = sequelize.define(
-    'Subject',
+  class Subject extends Model {
+    // instance or class methods here if needed
+  }
+
+  Subject.init(
     {
       subject_id: {
         type: DataTypes.INTEGER,
@@ -21,6 +26,7 @@ module.exports = (sequelize, DataTypes) => {
       },
     },
     {
+      sequelize,
       tableName: 'subjects',
       timestamps: true,
       underscored: true,
@@ -28,18 +34,15 @@ module.exports = (sequelize, DataTypes) => {
   );
 
   Subject.associate = (models) => {
-    Subject.belongsToMany(models.Class, {
-      through: 'class_subjects',
-      foreignKey: 'subject_id',
-      otherKey: 'class_id',
-      as: 'Classes',
+    Subject.belongsTo(models.SchoolAdmin, {
+      foreignKey: 'school_admin_id',
+      as: 'SchoolAdmin',
     });
 
-    Subject.belongsToMany(models.Schedule, {
-      through: 'schedule_subjects',
+    Subject.hasMany(models.Session, {
       foreignKey: 'subject_id',
-      otherKey: 'schedule_id',
-      as: 'Schedules',
+      as: 'Sessions',
+      onDelete: 'CASCADE',
     });
   };
 

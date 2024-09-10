@@ -1,23 +1,16 @@
+const { Model } = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
-  const Session = sequelize.define(
-    'Session',
+  class Session extends Model {
+    // instance or class methods here if needed
+  }
+
+  Session.init(
     {
       session_id: {
         type: DataTypes.INTEGER,
-        primaryKey: true,
         autoIncrement: true,
-      },
-      session_name: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      session_start_time: {
-        type: DataTypes.TIME,
-        allowNull: false,
-      },
-      session_end_time: {
-        type: DataTypes.TIME,
-        allowNull: false,
+        primaryKey: true,
       },
       active: {
         type: DataTypes.BOOLEAN,
@@ -26,6 +19,7 @@ module.exports = (sequelize, DataTypes) => {
       },
     },
     {
+      sequelize,
       tableName: 'sessions',
       timestamps: true,
       underscored: true,
@@ -33,9 +27,39 @@ module.exports = (sequelize, DataTypes) => {
   );
 
   Session.associate = (models) => {
-    Session.hasMany(models.Schedule, {
-      foreignKey: 'session_id',
-      as: 'Schedules',
+    Session.belongsTo(models.SchoolAdmin, {
+      foreignKey: 'school_admin_id',
+      as: 'SchoolAdmin',
+      onDelete: 'CASCADE',
+    });
+
+    Session.belongsTo(models.Teacher, {
+      foreignKey: 'teacher_id',
+      as: 'Teacher',
+      onDelete: 'CASCADE',
+    });
+
+    Session.belongsTo(models.Class, {
+      foreignKey: 'class_id',
+      as: 'Class',
+      onDelete: 'CASCADE',
+    });
+
+    Session.belongsTo(models.Subject, {
+      foreignKey: 'subject_id',
+      as: 'Subject',
+      onDelete: 'CASCADE',
+    });
+
+    Session.belongsTo(models.Period, {
+      foreignKey: 'period_id',
+      as: 'Period',
+      onDelete: 'CASCADE',
+    });
+
+    Session.belongsTo(models.DayOfWeek, {
+      foreignKey: 'day_id',
+      as: 'DayOfWeek',
       onDelete: 'CASCADE',
     });
   };
