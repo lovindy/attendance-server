@@ -20,6 +20,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
+      gender: {
+        type: DataTypes.ENUM('Male', 'Female', 'Other'),
+        allowNull: false,
+      },
       photo: {
         type: DataTypes.STRING,
         defaultValue: 'default.jpg',
